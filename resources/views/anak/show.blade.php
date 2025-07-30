@@ -109,36 +109,6 @@
                     @endif
                 </div>
 
-                <!-- Kolom Kanan -->
-                <div>
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Foto Anak</h3>
-                        @if($anak->foto_anak)
-                            <div class="bg-gray-100 rounded-lg overflow-hidden">
-                                <img src="{{ asset('storage/' . $anak->foto_anak) }}" alt="Foto {{ $anak->nama_lengkap }}" class="w-full h-auto">
-                            </div>
-                        @else
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                                <i class="fas fa-image text-4xl text-gray-400 mb-2"></i>
-                                <p class="text-gray-500">Tidak ada foto tersedia</p>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Foto KK</h3>
-                        @if($anak->foto_kk)
-                            <div class="bg-gray-100 rounded-lg overflow-hidden">
-                                <img src="{{ asset('storage/' . $anak->foto_kk) }}" alt="Foto KK {{ $anak->nama_lengkap }}" class="w-full h-auto">
-                            </div>
-                        @else
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                                <i class="fas fa-file-alt text-4xl text-gray-400 mb-2"></i>
-                                <p class="text-gray-500">Tidak ada foto KK tersedia</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
             </div>
 
             <div class="mt-8 pt-6 border-t border-gray-200">

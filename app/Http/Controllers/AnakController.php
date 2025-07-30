@@ -137,6 +137,14 @@ class AnakController extends Controller
         \Log::info('Current anak data before update:', $anak->toArray());
 
         try {
+            // Convert radio button values to boolean
+            $request->merge([
+                'asi_eksklusif' => $request->input('asi_eksklusif') === '1',
+                'mpasi' => $request->input('mpasi') === '1',
+                'vitamin_a' => $request->input('vitamin_a') === '1',
+                'pmt' => $request->input('pmt') === '1',
+            ]);
+
             $validated = $request->validate([
             // Data Pribadi
             'nama' => 'required|string|max:100',
