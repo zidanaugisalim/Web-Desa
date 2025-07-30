@@ -131,8 +131,13 @@ class AnakController extends Controller
     public function update(Request $request, Anak $anak)
     {
         $this->authorize('update', $anak);
+        
+        // Debug: Log the incoming request data
+        \Log::info('Update request data:', $request->all());
+        \Log::info('Current anak data before update:', $anak->toArray());
 
-        $validated = $request->validate([
+        try {
+            $validated = $request->validate([
             // Data Pribadi
             'nama' => 'required|string|max:100',
             'nik' => 'required|string|size:16|unique:anak,nik,' . $anak->id,
@@ -194,11 +199,26 @@ class AnakController extends Controller
             $validated['foto_kk'] = 'foto_kk/' . $fotoKKName;
         }
 
-        // Update data
-        $anak->update($validated);
+            // Update data
+            $anak->fill($validated);
+            $saved = $anak->save();
+            
+            // Debug: Log the update result and updated data
+            \Log::info('Update result:', ['success' => $saved]);
+            \Log::info('Updated anak data:', $anak->fresh()->toArray());
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Data anak berhasil diperbarui');
+            if ($saved) {
+                return redirect()->route('anak.show', $anak->id)
+                    ->with('success', 'Data anak berhasil diperbarui');
+            }
+            
+            return back()->with('error', 'Gagal memperbarui data anak');
+            
+        } catch (\Exception $e) {
+            \Log::error('Error updating anak data: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**

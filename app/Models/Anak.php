@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Anak extends Model
 {
+    use HasFactory;
+
     /**
      * Nama tabel yang terkait dengan model.
      *
@@ -14,11 +16,6 @@ class Anak extends Model
      */
     protected $table = 'anak';
 
-    /**
-     * Kolom yang dapat diisi secara massal.
-     *
-     * @var array
-     */
     protected $fillable = [
         'nama',
         'nik',
@@ -47,14 +44,23 @@ class Anak extends Model
         'pmt_jenis',
         'foto_anak',
         'foto_kk',
-        'user_id'
+        'user_id',
+        'catatan_khusus'
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
+        'berat_badan' => 'decimal:2',
+        'tinggi_badan' => 'decimal:2',
+        'lingkar_kepala' => 'decimal:2',
+        'lingkar_lengan' => 'decimal:2',
+        'asi_eksklusif' => 'boolean',
+        'mpasi' => 'boolean',
+        'vitamin_a' => 'boolean',
+        'pmt' => 'boolean',
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

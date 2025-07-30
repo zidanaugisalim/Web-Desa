@@ -3,7 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnakController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Api\AnakController as ApiAnakController;
 use Illuminate\Support\Facades\Route;
+
+// API Routes
+Route::get('/api/anak/perdesa', [ApiAnakController::class, 'perDesa'])->name('api.anak.perdesa');
 
 // Rute utama
 Route::get('/', function () {
@@ -25,9 +29,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
     
     // Rute Lupa Password
-    Route::get('/forgot-password', function () {
-        return view('auth.forgot-password');
-    })->name('password.request');
+    Route::get('/forgot-password', [AuthController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    
+    // Rute Reset Password
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'reset'])->name('password.update');
 });
 
 // Rute yang membutuhkan autentikasi
@@ -37,6 +44,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Rute untuk AnakController
     Route::resource('anak', AnakController::class);
+    
+    // Rute untuk StuntingController
+    Route::resource('stuntings', \App\Http\Controllers\StuntingController::class);
     
     // Halaman input data (redirect ke form create anak)
     Route::get('/input', function () {
