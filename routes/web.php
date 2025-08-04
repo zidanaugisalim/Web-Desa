@@ -3,11 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnakController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Api\AnakController as ApiAnakController;
 use Illuminate\Support\Facades\Route;
-
-// API Routes
-Route::get('/api/anak/perdesa', [ApiAnakController::class, 'perDesa'])->name('api.anak.perdesa');
 
 // Rute utama
 Route::get('/', function () {
@@ -57,15 +53,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/welcome', function () {
         return view('welcome');
     })->name('welcome');
-
-    // Rute untuk AnakController
-    Route::prefix('anak')->group(function () {
-        Route::get('/create', function () {
-            return view('anak.create');
-        })->name('anak.create');
-        
-        Route::post('/store', [AnakController::class, 'store'])->name('anak.store');
-    });
     
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

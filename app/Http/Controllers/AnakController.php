@@ -135,6 +135,9 @@ class AnakController extends Controller
         // Debug: Log the incoming request data
         \Log::info('Update request data:', $request->all());
         \Log::info('Current anak data before update:', $anak->toArray());
+        \Log::info('Form has alamat field: ' . ($request->has('alamat') ? 'Yes' : 'No'));
+        \Log::info('Form data raw: ' . $request->getContent());
+        \Log::info('Form alamat value: ' . $request->input('alamat', 'NOT FOUND'));
 
         try {
             // Convert radio button values to boolean
@@ -145,70 +148,69 @@ class AnakController extends Controller
                 'pmt' => $request->input('pmt') === '1',
             ]);
 
-            $validated = $request->validate([
-            // Data Pribadi
-            'nama' => 'required|string|max:100',
-            'nik' => 'required|string|size:16|unique:anak,nik,' . $anak->id,
-            'tempat_lahir' => 'required|string|max:100',
-            'tanggal_lahir' => 'required|date',
-            'jenis_kelamin' => 'required|in:L,P',
-            'nama_ayah' => 'required|string|max:100',
-            'nama_ibu' => 'required|string|max:100',
+            $rules = [
+                // Data Pribadi
+                'nama' => 'required|string|max:100',
+                'nik' => 'required|string|size:16|unique:anak,nik,' . $anak->id,
+                'tempat_lahir' => 'required|string|max:100',
+                'tanggal_lahir' => 'required|date',
+                'jenis_kelamin' => 'required|in:L,P',
+                'nama_ayah' => 'required|string|max:100',
+                'nama_ibu' => 'required|string|max:100',
+                
+                // Alamat
+                'alamat' => 'required|string',
+                'rt_rw' => 'required|string|max:20',
+                'kode_pos' => 'required|string|max:10',
+                'kecamatan' => 'required|string|max:100',
+                'kabupaten' => 'required|string|max:100',
+                'provinsi' => 'required|string|max:100',
+                'no_telepon' => 'required|string|max:15',
+                
+                // Data Kesehatan
+                'berat_badan' => 'required|numeric|min:0.1|max:200',
+                'tinggi_badan' => 'required|numeric|min:30|max:300',
+                'posisi_pengukuran' => 'required|in:Berdiri,Tidur',
+                'lingkar_kepala' => 'nullable|numeric|min:20|max:100',
+                'lingkar_lengan' => 'nullable|numeric|min:5|max:50',
+                'asi_eksklusif' => 'required|boolean',
+                'mpasi' => 'required|boolean',
+                'mpasi_jenis' => 'required_if:mpasi,1|string|max:100|nullable',
+                'vitamin_a' => 'required|boolean',
+                'pmt' => 'required|boolean',
+                'pmt_jenis' => 'required_if:pmt,1|string|max:100|nullable',
+                'catatan_khusus' => 'nullable|string',
+            ];
             
-            // Alamat
-            'alamat' => 'required|string',
-            'rt_rw' => 'required|string|max:20',
-            'kode_pos' => 'required|string|max:10',
-            'kecamatan' => 'required|string|max:100',
-            'kabupaten' => 'required|string|max:100',
-            'provinsi' => 'required|string|max:100',
-            'no_telepon' => 'required|string|max:15',
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
             
-            // Data Kesehatan
-            'berat_badan' => 'required|numeric|min:0.1|max:200', // Berat badan dalam kg (0.1kg - 200kg)
-            'tinggi_badan' => 'required|numeric|min:30|max:300', // Tinggi badan dalam cm (30cm - 300cm)
-            'posisi_pengukuran' => 'required|in:Berdiri,Tidur',
-            'lingkar_kepala' => 'nullable|numeric|min:20|max:100', // Lingkar kepala dalam cm (20cm - 100cm)
-            'lingkar_lengan' => 'nullable|numeric|min:5|max:50', // Lingkar lengan dalam cm (5cm - 50cm)
-            'asi_eksklusif' => 'required|boolean',
-            'mpasi' => 'required|boolean',
-            'mpasi_jenis' => 'required_if:mpasi,1|string|max:100|nullable',
-            'vitamin_a' => 'required|boolean',
-            'pmt' => 'required|boolean',
-            'pmt_jenis' => 'required_if:pmt,1|string|max:100|nullable',
-            
-            // Upload File
-            'foto_anak' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'foto_kk' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        // Handle file uploads
-        if ($request->hasFile('foto_anak')) {
-            // Hapus foto lama jika ada
-            if ($anak->foto_anak) {
-                Storage::delete('public/' . $anak->foto_anak);
+            if ($validator->fails()) {
+                \Log::error('Validation failed:', $validator->errors()->toArray());
+                return back()->withErrors($validator)->withInput();
             }
             
-            $fotoAnak = $request->file('foto_anak');
-            $fotoAnakName = 'anak_' . time() . '_' . Str::random(10) . '.' . $fotoAnak->getClientOriginalExtension();
-            $fotoAnak->storeAs('public/foto_anak', $fotoAnakName);
-            $validated['foto_anak'] = 'foto_anak/' . $fotoAnakName;
-        }
-
-        if ($request->hasFile('foto_kk')) {
-            // Hapus foto lama jika ada
-            if ($anak->foto_kk) {
-                Storage::delete('public/' . $anak->foto_kk);
+            $validated = $validator->validated();
+            
+            // Handle MP-ASI and PMT jenis fields
+            if (!$validated['mpasi']) {
+                $validated['mpasi_jenis'] = null;
             }
             
-            $fotoKK = $request->file('foto_kk');
-            $fotoKKName = 'kk_' . time() . '_' . Str::random(10) . '.' . $fotoKK->getClientOriginalExtension();
-            $fotoKK->storeAs('public/foto_kk', $fotoKKName);
-            $validated['foto_kk'] = 'foto_kk/' . $fotoKKName;
-        }
+            if (!$validated['pmt']) {
+                $validated['pmt_jenis'] = null;
+            }
 
+            // Debug: Log validated data
+            \Log::info('Validated data:', $validated);
+            
+            // Debug: Log alamat field specifically
+            \Log::info('Alamat field in validated data: ' . (isset($validated['alamat']) ? $validated['alamat'] : 'NOT FOUND'));
+            
             // Update data
-            $anak->fill($validated);
+            foreach ($validated as $key => $value) {
+                \Log::info('Setting ' . $key . ' to: ' . (is_string($value) ? $value : json_encode($value)));
+                $anak->{$key} = $value;
+            }
             $saved = $anak->save();
             
             // Debug: Log the update result and updated data
