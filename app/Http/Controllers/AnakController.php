@@ -62,6 +62,10 @@ class AnakController extends Controller
             'kecamatan' => 'required|string|max:100',
             'kabupaten' => 'required|string|max:100',
             'provinsi' => 'required|string|max:100',
+            'desa' => 'required|string|max:100',
+            'puskesmas' => 'required|string|max:100',
+            'tanggal_pengukuran' => 'required|date',
+            'posyandu' => 'required|string|max:100',
             'no_telepon' => 'required|string|max:15',
             
             // Data Kesehatan
@@ -165,6 +169,10 @@ class AnakController extends Controller
                 'kecamatan' => 'required|string|max:100',
                 'kabupaten' => 'required|string|max:100',
                 'provinsi' => 'required|string|max:100',
+                'desa' => 'required|string|max:100',
+                'puskesmas' => 'required|string|max:100',
+                'tanggal_pengukuran' => 'required|date',
+                'posyandu' => 'required|string|max:100',
                 'no_telepon' => 'required|string|max:15',
                 
                 // Data Kesehatan

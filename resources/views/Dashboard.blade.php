@@ -94,6 +94,7 @@
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIK</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Kelamin</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Lahir</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IMT</th>
                                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                             </tr>
                                         </thead>
@@ -127,6 +128,41 @@
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         {{ \Carbon\Carbon::parse($item->tanggal_lahir)->format('d/m/Y') }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        @if($item->berat_badan && $item->tinggi_badan && $item->tinggi_badan > 0)
+                                                            @php
+                                                                $tinggi_m = $item->tinggi_badan / 100; // Konversi cm ke m
+                                                                $imt = round($item->berat_badan / ($tinggi_m * $tinggi_m), 2);
+                                                                
+                                                                // Kategori IMT berdasarkan KMS (Kartu Menuju Sehat)
+                                                                $kategori = '';
+                                                                $warna = '';
+                                                                
+                                                                // Pengelompokan berdasarkan KMS
+                                                                if ($imt < 17) {
+                                                                    $kategori = 'Gizi Buruk';
+                                                                    $warna = 'bg-red-100 text-red-800';
+                                                                } elseif ($imt >= 17 && $imt < 18.5) {
+                                                                    $kategori = 'Gizi Kurang';
+                                                                    $warna = 'bg-yellow-100 text-yellow-800';
+                                                                } elseif ($imt >= 18.5 && $imt < 25) {
+                                                                    $kategori = 'Gizi Baik';
+                                                                    $warna = 'bg-green-100 text-green-800';
+                                                                } else {
+                                                                    $kategori = 'Gizi Lebih';
+                                                                    $warna = 'bg-yellow-100 text-yellow-800';
+                                                                }
+                                                            @endphp
+                                                            <div>
+                                                                <span class="font-medium">{{ $imt }}</span>
+                                                                <span class="px-2 ml-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $warna }}">
+                                                                    {{ $kategori }}
+                                                                </span>
+                                                            </div>
+                                                        @else
+                                                            <span class="text-gray-400">Tidak tersedia</span>
+                                                        @endif
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <a href="{{ route('anak.show', $item->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">

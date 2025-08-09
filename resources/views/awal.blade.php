@@ -119,6 +119,28 @@
             </div>
         </section>
 
+        <!-- Grafik Data Anak -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Data Anak Desa Bangunharjo</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="w-full md:w-2/3 min-h-[300px] flex items-center justify-center">
+                        <canvas id="anakChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="w-full md:w-1/3 flex flex-col justify-center items-center mt-4 md:mt-0">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-semibold mb-2">Total Data Anak</h3>
+                            <div class="text-4xl font-bold text-green-600" id="totalAnak">0</div>
+                            <p class="text-gray-600 mt-2">Data terdaftar di sistem</p>
+                        </div>
+                        <div class="bg-green-100 p-4 rounded-lg">
+                            <p class="text-gray-700">Grafik menampilkan jumlah data anak yang diinput oleh pengguna sistem. Data ini membantu pemantauan tumbuh kembang anak di Desa Bangunharjo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
         <!-- Berita Terbaru -->
         <section class="mb-16">
             <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Berita Terbaru</h2>
@@ -214,8 +236,115 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         AOS.init();
+        
+        // Fungsi untuk mengambil data anak per user
+        async function fetchAnakPerUserData() {
+            try {
+                const response = await fetch('/api/anak-per-user');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return [];
+            }
+        }
+        
+        // Fungsi untuk mengambil total anak
+        async function fetchTotalAnak() {
+            try {
+                const response = await fetch('/api/total-anak');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                return data.total;
+            } catch (error) {
+                console.error('Error fetching total:', error);
+                return 0;
+            }
+        }
+        
+        // Fungsi untuk membuat grafik
+        async function createChart() {
+            // Mengambil data
+            const userData = await fetchAnakPerUserData();
+            const totalAnak = await fetchTotalAnak();
+            
+            // Menampilkan total anak
+            document.getElementById('totalAnak').textContent = totalAnak;
+            
+            // Menyiapkan data untuk grafik
+            const labels = userData.map(item => item.name);
+            const data = userData.map(item => item.jumlah_anak);
+            
+            // Jika tidak ada data, tampilkan pesan
+            if (userData.length === 0) {
+                const chartContainer = document.getElementById('anakChart').parentNode;
+                chartContainer.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-gray-500 text-center">Belum ada data anak yang tersedia.<br>Data akan muncul setelah pengguna menginput data anak.</p></div>';
+                return;
+            }
+            
+            // Membuat grafik
+            const ctx = document.getElementById('anakChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Jumlah Anak',
+                        data: data,
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Jumlah Data Anak per Pengguna'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw} anak`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Anak'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Pengguna'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Memanggil fungsi untuk membuat grafik saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', createChart);
     </script>
 </body>
 </html>

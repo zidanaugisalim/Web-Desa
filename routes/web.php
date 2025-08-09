@@ -3,12 +3,17 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnakController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GraphController;
 use Illuminate\Support\Facades\Route;
 
 // Rute utama
 Route::get('/', function () {
     return view('awal');
 })->name('home');
+
+// Rute API untuk grafik
+Route::get('/api/anak-per-user', [GraphController::class, 'getAnakPerUserData']);
+Route::get('/api/total-anak', [GraphController::class, 'getTotalAnak']);
 
 Route::get('/awal', function () {
     return view('awal');

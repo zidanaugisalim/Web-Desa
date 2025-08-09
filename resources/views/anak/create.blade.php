@@ -132,28 +132,95 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
-                            <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan') }}" 
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
-                            @error('kecamatan')
+                            <label for="provinsi" class="block text-sm font-medium text-gray-700">Provinsi</label>
+                            <select name="provinsi" id="provinsi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                                <option value="">Pilih Provinsi</option>
+                                <option value="DI YOGYAKARTA" {{ old('provinsi') == 'DI YOGYAKARTA' ? 'selected' : '' }}>DI YOGYAKARTA</option>
+                                <!-- Tambahkan provinsi lain jika diperlukan -->
+                            </select>
+                            @error('provinsi')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mb-4">
                             <label for="kabupaten" class="block text-sm font-medium text-gray-700">Kabupaten/Kota</label>
-                            <input type="text" name="kabupaten" id="kabupaten" value="{{ old('kabupaten') }}" 
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                            <select name="kabupaten" id="kabupaten" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                                <option value="">Pilih Kabupaten/Kota</option>
+                                <option value="BANTUL" {{ old('kabupaten') == 'BANTUL' ? 'selected' : '' }}>BANTUL</option>
+                                <!-- Kabupaten/kota akan diisi melalui JavaScript -->
+                            </select>
                             @error('kabupaten')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mb-4">
-                            <label for="provinsi" class="block text-sm font-medium text-gray-700">Provinsi</label>
-                            <input type="text" name="provinsi" id="provinsi" value="{{ old('provinsi') }}" 
+                            <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                            <select name="kecamatan" id="kecamatan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                                <option value="">Pilih Kecamatan</option>
+                                <option value="SEWON" {{ old('kecamatan') == 'SEWON' ? 'selected' : '' }}>SEWON</option>
+                                <!-- Kecamatan akan diisi melalui JavaScript -->
+                            </select>
+                            @error('kecamatan')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="desa" class="block text-sm font-medium text-gray-700">Desa/Kelurahan</label>
+                            <select name="desa" id="desa" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                                <option value="">Pilih Desa/Kelurahan</option>
+                                <option value="BANGUNHARJO" {{ old('desa') == 'BANGUNHARJO' ? 'selected' : '' }}>BANGUNHARJO</option>
+                                <!-- Desa/kelurahan akan diisi melalui JavaScript -->
+                            </select>
+                            @error('desa')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="puskesmas" class="block text-sm font-medium text-gray-700">Puskesmas</label>
+                            <select name="puskesmas" id="puskesmas" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                                <option value="SEWON II" {{ old('puskesmas') == 'SEWON II' ? 'selected' : '' }}>SEWON II</option>
+                            </select>
+                            @error('puskesmas')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="posyandu" class="block text-sm font-medium text-gray-700">Posyandu</label>
+                            <select name="posyandu" id="posyandu" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
+                                <option value="">Pilih Posyandu</option>
+                                <option value="Bina Sejahtera 1 Salakan" {{ old('posyandu') == 'Bina Sejahtera 1 Salakan' ? 'selected' : '' }}>Bina Sejahtera 1 Salakan</option>
+                                <option value="Harapan Pertiwi Druwo" {{ old('posyandu') == 'Harapan Pertiwi Druwo' ? 'selected' : '' }}>Harapan Pertiwi Druwo</option>
+                                <option value="Bina Sejahtera 2 Salakan" {{ old('posyandu') == 'Bina Sejahtera 2 Salakan' ? 'selected' : '' }}>Bina Sejahtera 2 Salakan</option>
+                                <option value="Tunas Harapan Jotawang" {{ old('posyandu') == 'Tunas Harapan Jotawang' ? 'selected' : '' }}>Tunas Harapan Jotawang</option>
+                                <option value="Mawar Saman" {{ old('posyandu') == 'Mawar Saman' ? 'selected' : '' }}>Mawar Saman</option>
+                                <option value="Mekar Melati 1 Demangan" {{ old('posyandu') == 'Mekar Melati 1 Demangan' ? 'selected' : '' }}>Mekar Melati 1 Demangan</option>
+                                <option value="Mekar Melati 2 Demangan" {{ old('posyandu') == 'Mekar Melati 2 Demangan' ? 'selected' : '' }}>Mekar Melati 2 Demangan</option>
+                                <option value="Harapan Ibu Widoro" {{ old('posyandu') == 'Harapan Ibu Widoro' ? 'selected' : '' }}>Harapan Ibu Widoro</option>
+                                <option value="Kuncup Mekar Bakung" {{ old('posyandu') == 'Kuncup Mekar Bakung' ? 'selected' : '' }}>Kuncup Mekar Bakung</option>
+                                <option value="Kasih Ibu Semail" {{ old('posyandu') == 'Kasih Ibu Semail' ? 'selected' : '' }}>Kasih Ibu Semail</option>
+                                <option value="Kuntum Melati 1 Pandeyan" {{ old('posyandu') == 'Kuntum Melati 1 Pandeyan' ? 'selected' : '' }}>Kuntum Melati 1 Pandeyan</option>
+                                <option value="Kuncup Asih Mredo" {{ old('posyandu') == 'Kuncup Asih Mredo' ? 'selected' : '' }}>Kuncup Asih Mredo</option>
+                                <option value="Ngesti Rahayu Jurug" {{ old('posyandu') == 'Ngesti Rahayu Jurug' ? 'selected' : '' }}>Ngesti Rahayu Jurug</option>
+                                <option value="Kuncup Melati Wojo" {{ old('posyandu') == 'Kuncup Melati Wojo' ? 'selected' : '' }}>Kuncup Melati Wojo</option>
+                                <option value="Puspita Pertiwi Randu Belang" {{ old('posyandu') == 'Puspita Pertiwi Randu Belang' ? 'selected' : '' }}>Puspita Pertiwi Randu Belang</option>
+                                <option value="Tunas Melati Gatak" {{ old('posyandu') == 'Tunas Melati Gatak' ? 'selected' : '' }}>Tunas Melati Gatak</option>
+                                <option value="Mekarsari Ngoto" {{ old('posyandu') == 'Mekarsari Ngoto' ? 'selected' : '' }}>Mekarsari Ngoto</option>
+                            </select>
+                            @error('posyandu')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="tanggal_pengukuran" class="block text-sm font-medium text-gray-700">Tanggal Pengukuran</label>
+                            <input type="date" name="tanggal_pengukuran" id="tanggal_pengukuran" value="{{ old('tanggal_pengukuran', date('Y-m-d')) }}" 
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" required>
-                            @error('provinsi')
+                            @error('tanggal_pengukuran')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -372,6 +439,83 @@
         }
         
         document.getElementById('usia').value = age + ' tahun';
+    });
+    
+    // Alamat dropdown handling
+    const wilayahData = {
+        'DI YOGYAKARTA': {
+            'BANTUL': {
+                'SEWON': ['BANGUNHARJO']
+            }
+            // Tambahkan kabupaten/kota lain jika diperlukan
+        }
+        // Tambahkan provinsi lain jika diperlukan
+    };
+    
+    // Provinsi dropdown change event
+    document.getElementById('provinsi').addEventListener('change', function() {
+        const provinsi = this.value;
+        const kabupatenDropdown = document.getElementById('kabupaten');
+        const kecamatanDropdown = document.getElementById('kecamatan');
+        const desaDropdown = document.getElementById('desa');
+        
+        // Reset dropdowns
+        kabupatenDropdown.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+        kecamatanDropdown.innerHTML = '<option value="">Pilih Kecamatan</option>';
+        desaDropdown.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+        
+        if (provinsi && wilayahData[provinsi]) {
+            // Populate kabupaten dropdown
+            Object.keys(wilayahData[provinsi]).forEach(kabupaten => {
+                const option = document.createElement('option');
+                option.value = kabupaten;
+                option.textContent = kabupaten;
+                kabupatenDropdown.appendChild(option);
+            });
+        }
+    });
+    
+    // Kabupaten dropdown change event
+    document.getElementById('kabupaten').addEventListener('change', function() {
+        const provinsi = document.getElementById('provinsi').value;
+        const kabupaten = this.value;
+        const kecamatanDropdown = document.getElementById('kecamatan');
+        const desaDropdown = document.getElementById('desa');
+        
+        // Reset dropdowns
+        kecamatanDropdown.innerHTML = '<option value="">Pilih Kecamatan</option>';
+        desaDropdown.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+        
+        if (provinsi && kabupaten && wilayahData[provinsi][kabupaten]) {
+            // Populate kecamatan dropdown
+            Object.keys(wilayahData[provinsi][kabupaten]).forEach(kecamatan => {
+                const option = document.createElement('option');
+                option.value = kecamatan;
+                option.textContent = kecamatan;
+                kecamatanDropdown.appendChild(option);
+            });
+        }
+    });
+    
+    // Kecamatan dropdown change event
+    document.getElementById('kecamatan').addEventListener('change', function() {
+        const provinsi = document.getElementById('provinsi').value;
+        const kabupaten = document.getElementById('kabupaten').value;
+        const kecamatan = this.value;
+        const desaDropdown = document.getElementById('desa');
+        
+        // Reset dropdown
+        desaDropdown.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+        
+        if (provinsi && kabupaten && kecamatan && wilayahData[provinsi][kabupaten][kecamatan]) {
+            // Populate desa dropdown
+            wilayahData[provinsi][kabupaten][kecamatan].forEach(desa => {
+                const option = document.createElement('option');
+                option.value = desa;
+                option.textContent = desa;
+                desaDropdown.appendChild(option);
+            });
+        }
     });
 </script>
 @endpush

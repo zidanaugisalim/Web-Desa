@@ -87,6 +87,10 @@
                                 </div>
                             </div>
                             <div>
+                                <p class="text-sm font-medium text-gray-500">Desa/Kelurahan</p>
+                                <p class="mt-1">{{ $anak->desa ?? '-' }}</p>
+                            </div>
+                            <div>
                                 <p class="text-sm font-medium text-gray-500">Kecamatan</p>
                                 <p class="mt-1">{{ $anak->kecamatan }}</p>
                             </div>
@@ -97,6 +101,18 @@
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Provinsi</p>
                                 <p class="mt-1">{{ $anak->provinsi }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Puskesmas</p>
+                                <p class="mt-1">{{ $anak->puskesmas ?? 'SEWON II' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Posyandu</p>
+                                <p class="mt-1">{{ $anak->posyandu ?? '-' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Tanggal Pengukuran</p>
+                                <p class="mt-1">{{ $anak->tanggal_pengukuran ? $anak->tanggal_pengukuran->format('d/m/Y') : '-' }}</p>
                             </div>
                         </div>
                     </div>

@@ -30,6 +30,10 @@ class Anak extends Model
         'kecamatan',
         'kabupaten',
         'provinsi',
+        'desa',
+        'puskesmas',
+        'tanggal_pengukuran',
+        'posyandu',
         'no_telepon',
         'berat_badan',
         'tinggi_badan',
@@ -50,6 +54,7 @@ class Anak extends Model
 
     protected $casts = [
         'tanggal_lahir' => 'date',
+        'tanggal_pengukuran' => 'date',
         'berat_badan' => 'decimal:2',
         'tinggi_badan' => 'decimal:2',
         'lingkar_kepala' => 'decimal:2',
