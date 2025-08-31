@@ -125,6 +125,55 @@
                     @endif
                 </div>
 
+                <!-- Kolom Kanan -->
+                <div>
+                    <!-- Form Pengukuran IMT -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Pengukuran IMT</h3>
+                        <form id="formPengukuranImt" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label for="berat_badan" class="block text-sm font-medium text-gray-700">Berat Badan (kg)</label>
+                                <input type="number" id="berat_badan" name="berat_badan" step="0.1" min="0.1" max="200" required
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="tinggi_badan" class="block text-sm font-medium text-gray-700">Tinggi Badan (cm)</label>
+                                <input type="number" id="tinggi_badan" name="tinggi_badan" step="0.1" min="30" max="300" required
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="tanggal_pengukuran" class="block text-sm font-medium text-gray-700">Tanggal Pengukuran</label>
+                                <input type="date" id="tanggal_pengukuran" name="tanggal_pengukuran" value="{{ date('Y-m-d') }}" required
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label for="catatan" class="block text-sm font-medium text-gray-700">Catatan (Opsional)</label>
+                                <input type="text" id="catatan" name="catatan" placeholder="Catatan tambahan"
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <i class="fas fa-save mr-2"></i> Simpan Pengukuran
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Grafik IMT -->
+            <div class="mt-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
+                        <i class="fas fa-chart-line mr-2"></i> Grafik Pemantauan IMT
+                    </h3>
+                    <div class="relative">
+                        <canvas id="chartIMT" width="400" height="200"></canvas>
+                        <div id="noDataMessage" class="text-center text-gray-500 py-8" style="display: none;">
+                            <p>Belum ada data pengukuran IMT. Silakan tambahkan pengukuran pertama.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-8 pt-6 border-t border-gray-200">
@@ -143,4 +192,210 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let chartIMT = null;
+const anakId = {{ $anak->id }};
+
+// Inisialisasi grafik saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    loadGrafikIMT();
+    
+    // Event listener untuk form pengukuran IMT
+    document.getElementById('formPengukuranImt').addEventListener('submit', function(e) {
+        e.preventDefault();
+        simpanPengukuranIMT();
+    });
+});
+
+// Fungsi untuk memuat grafik IMT
+function loadGrafikIMT() {
+    fetch(`/anak/${anakId}/pengukuran-imt-data`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                document.getElementById('noDataMessage').style.display = 'block';
+                document.getElementById('chartIMT').style.display = 'none';
+            } else {
+                document.getElementById('noDataMessage').style.display = 'none';
+                document.getElementById('chartIMT').style.display = 'block';
+                buatGrafikIMT(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading IMT data:', error);
+        });
+}
+
+// Fungsi untuk membuat grafik IMT
+function buatGrafikIMT(data) {
+    const ctx = document.getElementById('chartIMT').getContext('2d');
+    
+    // Hapus grafik lama jika ada
+    if (chartIMT) {
+        chartIMT.destroy();
+    }
+    
+    const labels = data.map(item => {
+        const date = new Date(item.tanggal);
+        return date.toLocaleDateString('id-ID');
+    });
+    
+    const imtData = data.map(item => item.imt);
+    
+    // Warna berdasarkan kategori IMT
+    const backgroundColors = data.map(item => {
+        switch(item.kategori) {
+            case 'Sangat Kurus': return 'rgba(220, 53, 69, 0.8)';
+            case 'Kurus': return 'rgba(255, 193, 7, 0.8)';
+            case 'Normal': return 'rgba(40, 167, 69, 0.8)';
+            case 'Gemuk': return 'rgba(255, 193, 7, 0.8)';
+            case 'Obesitas': return 'rgba(220, 53, 69, 0.8)';
+            default: return 'rgba(108, 117, 125, 0.8)';
+        }
+    });
+    
+    chartIMT = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'IMT',
+                data: imtData,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.1,
+                pointBackgroundColor: backgroundColors,
+                pointBorderColor: backgroundColors,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'IMT (kg/m²)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Tanggal Pengukuran'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Grafik Pemantauan IMT - {{ $anak->nama }}'
+                },
+                legend: {
+                    display: true
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const index = context.dataIndex;
+                            const item = data[index];
+                            return [
+                                `Kategori: ${item.kategori}`,
+                                `Berat: ${item.berat_badan} kg`,
+                                `Tinggi: ${item.tinggi_badan} cm`
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Fungsi untuk menyimpan pengukuran IMT
+function simpanPengukuranIMT() {
+    const form = document.getElementById('formPengukuranImt');
+    const formData = new FormData(form);
+    
+    // Disable tombol submit
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+    
+    fetch(`/anak/${anakId}/pengukuran-imt`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reset form
+            form.reset();
+            document.getElementById('tanggal_pengukuran').value = new Date().toISOString().split('T')[0];
+            
+            // Reload grafik
+            loadGrafikIMT();
+            
+            // Tampilkan pesan sukses
+            showAlert('success', data.message);
+        } else {
+            showAlert('error', data.message || 'Gagal menyimpan data pengukuran');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', 'Terjadi kesalahan saat menyimpan data');
+    })
+    .finally(() => {
+        // Enable tombol submit
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+// Fungsi untuk menampilkan alert
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+        type === 'success' ? 'bg-green-100 border-l-4 border-green-500 text-green-700' : 
+        'bg-red-100 border-l-4 border-red-500 text-red-700'
+    }`;
+    alertDiv.innerHTML = `
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'
+                }"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium">${message}</p>
+            </div>
+            <div class="ml-auto pl-3">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
 @endsection

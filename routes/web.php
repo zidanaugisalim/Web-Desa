@@ -42,9 +42,17 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/arsip', [DashboardController::class, 'arsip'])->name('arsip');
+    
+    // API untuk grafik dashboard
+    Route::get('/api/status-gizi-dashboard', [DashboardController::class, 'apiStatusGiziDashboard']);
 
     // Rute untuk AnakController
     Route::resource('anak', AnakController::class);
+    
+    // Rute untuk pengukuran IMT
+    Route::post('/anak/{anak}/pengukuran-imt', [AnakController::class, 'storePengukuranImt'])->name('anak.pengukuran-imt.store');
+    Route::get('/anak/{anak}/pengukuran-imt-data', [AnakController::class, 'getPengukuranImtData'])->name('anak.pengukuran-imt.data');
     
     // Rute untuk StuntingController
     Route::resource('stuntings', \App\Http\Controllers\StuntingController::class);

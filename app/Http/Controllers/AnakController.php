@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anak;
+use App\Models\PengukuranImt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AnakController extends Controller
 {
@@ -104,6 +106,24 @@ class AnakController extends Controller
         // Tambahkan user_id
         $validated['user_id'] = Auth::id();
 
+        // Map field names for database compatibility
+        // Copy 'nama' to 'nama_anak' for Stunting model compatibility
+        if (isset($validated['nama'])) {
+            $validated['nama_anak'] = $validated['nama'];
+        }
+        
+        // Copy 'nama_ayah' and 'nama_ibu' to 'nama_orangtua' for Stunting model compatibility
+        if (isset($validated['nama_ayah']) && isset($validated['nama_ibu'])) {
+            $validated['nama_orangtua'] = $validated['nama_ayah'] . ' / ' . $validated['nama_ibu'];
+        }
+        
+        // Copy 'rt_rw' to 'rt' and 'rw' for Stunting model compatibility
+        if (isset($validated['rt_rw'])) {
+            $rtRw = explode('/', $validated['rt_rw']);
+            $validated['rt'] = isset($rtRw[0]) ? trim($rtRw[0]) : '';
+            $validated['rw'] = isset($rtRw[1]) ? trim($rtRw[1]) : '';
+        }
+
         // Simpan data
         Anak::create($validated);
 
@@ -117,7 +137,11 @@ class AnakController extends Controller
     public function show(Anak $anak)
     {
         $this->authorize('view', $anak);
-        return view('anak.show', compact('anak'));
+        
+        // Ambil data pengukuran IMT untuk grafik
+        $pengukuranImt = $anak->pengukuranImt()->orderBy('tanggal_pengukuran', 'asc')->get();
+        
+        return view('anak.show', compact('anak', 'pengukuranImt'));
     }
 
     /**
@@ -187,7 +211,6 @@ class AnakController extends Controller
                 'vitamin_a' => 'required|boolean',
                 'pmt' => 'required|boolean',
                 'pmt_jenis' => 'required_if:pmt,1|string|max:100|nullable',
-                'catatan_khusus' => 'nullable|string',
             ];
             
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
@@ -258,5 +281,73 @@ class AnakController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Data anak berhasil dihapus');
+    }
+    
+    /**
+     * Simpan pengukuran IMT baru
+     */
+    public function storePengukuranImt(Request $request, Anak $anak)
+    {
+        $this->authorize('view', $anak);
+        
+        $validated = $request->validate([
+            'berat_badan' => 'required|numeric|min:0.1|max:200',
+            'tinggi_badan' => 'required|numeric|min:30|max:300',
+            'tanggal_pengukuran' => 'required|date',
+            'catatan' => 'nullable|string|max:500'
+        ]);
+        
+        // Hitung IMT
+        $imt = PengukuranImt::hitungIMT($validated['berat_badan'], $validated['tinggi_badan']);
+        
+        // Hitung umur anak dalam bulan untuk kategori IMT
+        $umurBulan = Carbon::parse($anak->tanggal_lahir)->diffInMonths(Carbon::parse($validated['tanggal_pengukuran']));
+        
+        // Tentukan kategori IMT
+        $kategoriImt = PengukuranImt::kategoriIMT($imt, $umurBulan, $anak->jenis_kelamin);
+        
+        // Simpan data pengukuran
+        PengukuranImt::create([
+            'anak_id' => $anak->id,
+            'berat_badan' => $validated['berat_badan'],
+            'tinggi_badan' => $validated['tinggi_badan'],
+            'imt' => $imt,
+            'kategori_imt' => $kategoriImt,
+            'tanggal_pengukuran' => $validated['tanggal_pengukuran'],
+            'catatan' => $validated['catatan']
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Data pengukuran IMT berhasil disimpan',
+            'data' => [
+                'imt' => $imt,
+                'kategori_imt' => $kategoriImt,
+                'tanggal_pengukuran' => $validated['tanggal_pengukuran']
+            ]
+        ]);
+    }
+    
+    /**
+     * Ambil data pengukuran IMT untuk grafik
+     */
+    public function getPengukuranImtData(Anak $anak)
+    {
+        $this->authorize('view', $anak);
+        
+        $pengukuranImt = $anak->pengukuranImt()
+            ->orderBy('tanggal_pengukuran', 'asc')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'tanggal' => $item->tanggal_pengukuran->format('Y-m-d'),
+                    'imt' => $item->imt,
+                    'kategori' => $item->kategori_imt,
+                    'berat_badan' => $item->berat_badan,
+                    'tinggi_badan' => $item->tinggi_badan
+                ];
+            });
+            
+        return response()->json($pengukuranImt);
     }
 }

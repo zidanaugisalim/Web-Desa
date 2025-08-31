@@ -765,10 +765,6 @@
                 <div class="bg-white p-8 rounded-2xl shadow-lg inline-block">
                     <h4 class="text-xl font-bold text-gray-800 mb-6">Aksi Cepat</h4>
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a href="/login" class="btn-primary inline-flex items-center px-6 py-3 rounded-xl">
-                            <i class="fas fa-plus mr-2"></i>
-                            Tambah Data Anak
-                        </a>
                         <a href="/login" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors inline-flex items-center">
                             <i class="fas fa-download mr-2"></i>
                             Export Data

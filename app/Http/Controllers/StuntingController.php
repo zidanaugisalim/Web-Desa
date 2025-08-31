@@ -13,7 +13,7 @@ class StuntingController extends Controller
      */
     public function index()
     {
-        $stuntings = Stunting::latest()->paginate(10);
+        $stuntings = auth()->user()->stuntings()->active()->latest()->paginate(10);
         return view('stuntings.index', compact('stuntings'));
     }
 
@@ -47,6 +47,7 @@ class StuntingController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
+        $validated['user_id'] = auth()->id();
         Stunting::create($validated);
 
         return redirect()->route('stuntings.index')

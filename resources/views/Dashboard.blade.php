@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #f8fafc;
@@ -89,7 +91,7 @@
                                     </div>
                                 </div>
                             </div>
-                        @endif
+                        @endif 
 
                         <!-- Dashboard Statistics -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -103,7 +105,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-blue-600">Total Data Anak</p>
-                                        <p class="text-2xl font-bold text-blue-900">{{ $anak->total() }}</p>
+                                        <p class="text-2xl font-bold text-blue-900">{{ $anakPaginated->total() }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -120,7 +122,7 @@
                                         <p class="text-sm font-medium text-green-600">Gizi Baik</p>
                                         <p class="text-2xl font-bold text-green-900">
                                             @php
-                                                $giziBaik = $anak->filter(function($item) {
+                                                $giziBaik = $anakPaginated->filter(function($item) {
                                                     if ($item->berat_badan && $item->tinggi_badan && $item->tinggi_badan > 0) {
                                                         $tinggi_m = $item->tinggi_badan / 100;
                                                         $imt = $item->berat_badan / ($tinggi_m * $tinggi_m);
@@ -147,10 +149,10 @@
                                         <p class="text-sm font-medium text-yellow-600">Perlu Perhatian</p>
                                         <p class="text-2xl font-bold text-yellow-900">
                                             @php
-                                                $perluPerhatian = $anak->filter(function($item) {
-                                                    if ($item->berat_badan && $item->tinggi_badan && $item->tinggi_badan > 0) {
-                                                        $tinggi_m = $item->tinggi_badan / 100;
-                                                        $imt = $item->berat_badan / ($tinggi_m * $tinggi_m);
+                                    $perluPerhatian = $anakPaginated->filter(function($item) {
+                                        if ($item->berat_badan && $item->tinggi_badan && $item->tinggi_badan > 0) {
+                                            $tinggi_m = $item->tinggi_badan / 100;
+                                            $imt = $item->berat_badan / ($tinggi_m * $tinggi_m);
                                                         return $imt < 18.5 || $imt >= 25;
                                                     }
                                                     return false;
@@ -173,10 +175,61 @@
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-purple-600">Data Bulan Ini</p>
                                         <p class="text-2xl font-bold text-purple-900">
-                                            {{ $anak->filter(function($item) {
-                                                return $item->created_at->isCurrentMonth();
-                                            })->count() }}
+                                            {{ $anakPaginated->filter(function($item) {
+                                return $item->created_at->isCurrentMonth();
+                            })->count() }}
                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grafik Status Gizi dan Link Arsip -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                            <!-- Grafik Status Gizi -->
+                            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-900">Distribusi Status Gizi Anak</h4>
+                                    <div class="text-sm text-gray-500">
+                                        <i class="fas fa-chart-pie mr-1"></i> Data Aktif
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <canvas id="statusGiziChart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">Aksi Cepat</h4>
+                                <div class="space-y-3">
+                                    <a href="{{ route('arsip') }}" class="flex items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors duration-200 group">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-gray-500 rounded-lg flex items-center justify-center group-hover:bg-gray-600 transition-colors duration-200">
+                                                <i class="fas fa-archive text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Lihat Arsip</p>
+                                            <p class="text-xs text-gray-500">Anak berumur 5+ tahun</p>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <i class="fas fa-chevron-right text-gray-400 group-hover:text-gray-600"></i>
+                                        </div>
+                                    </a>
+                                    
+
+
+                                    <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-info-circle text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Info Arsip</p>
+                                            <p class="text-xs text-gray-500">Otomatis saat umur 5+ tahun</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -187,15 +240,21 @@
                             <div class="flex justify-between items-center mb-6">
                                 <h4 class="text-xl font-bold text-gray-900">Daftar Data Anak</h4>
                                 <div class="flex space-x-3">
-                                    <button class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                                        <i class="fas fa-download mr-2"></i> Export
-                                    </button>
-                                    <button class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                                        <i class="fas fa-filter mr-2"></i> Filter
-                                    </button>
+                                    <div class="relative">
+                                        <select id="filterSelect" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 appearance-none pr-8">
+                                            <option value="">Filter Data</option>
+                                            <option value="date_asc">Tanggal Ditambahkan (Lama ke Baru)</option>
+                                            <option value="date_desc">Tanggal Ditambahkan (Baru ke Lama)</option>
+                                            <option value="name_asc">Nama A-Z</option>
+                                            <option value="name_desc">Nama Z-A</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                            <i class="fas fa-filter text-gray-400"></i>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            @if($anak->count() > 0)
+                            @if($anakPaginated->count() > 0)
                                 <div class="bg-white shadow-sm rounded-lg overflow-hidden">
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200">
@@ -210,7 +269,7 @@
                                                 </tr>
                                             </thead>
                                         <tbody class="bg-white divide-y divide-gray-200">
-                                            @foreach($anak as $item)
+                                            @foreach($anakPaginated as $item)
                                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="flex items-center">
@@ -325,7 +384,7 @@
                                     </table>
                                 </div>
                                 <div class="mt-4">
-                                    {{ $anak->links() }}
+                                    {{ $anakPaginated->links() }}
                                 </div>
                             @else
                                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
@@ -399,6 +458,123 @@
     // Perbarui waktu setiap detik
     setInterval(updateDateTime, 1000);
     updateDateTime(); // Panggil sekali saat halaman dimuat
+
+    // Grafik Status Gizi
+    const ctx = document.getElementById('statusGiziChart');
+    if (ctx) {
+        fetch('/api/status-gizi-dashboard', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.values,
+                            backgroundColor: [
+                                '#10B981', // Green - Gizi Baik
+                                '#F59E0B', // Yellow - Gizi Kurang
+                                '#EF4444', // Red - Gizi Buruk
+                                '#8B5CF6', // Purple - Gizi Lebih
+                                '#6B7280'  // Gray - Belum Diperiksa
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} anak (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading chart data:', error);
+                // Tampilkan pesan error di canvas
+                const canvas = document.getElementById('statusGiziChart');
+                const parent = canvas.parentElement;
+                parent.innerHTML = '<div class="flex items-center justify-center h-48 text-gray-500"><i class="fas fa-exclamation-triangle mr-2"></i>Gagal memuat data grafik</div>';
+            });
+    }
+
+    // Fungsi untuk filter data
+    document.getElementById('filterSelect').addEventListener('change', function() {
+        const filterValue = this.value;
+        const tableBody = document.querySelector('tbody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        
+        if (!filterValue) {
+            // Reset ke urutan asli jika tidak ada filter
+            location.reload();
+            return;
+        }
+        
+        // Sort rows berdasarkan filter yang dipilih
+        rows.sort((a, b) => {
+            if (filterValue === 'name_asc' || filterValue === 'name_desc') {
+                const nameA = a.querySelector('td .text-sm.font-semibold').textContent.trim().toLowerCase();
+                const nameB = b.querySelector('td .text-sm.font-semibold').textContent.trim().toLowerCase();
+                
+                if (filterValue === 'name_asc') {
+                    return nameA.localeCompare(nameB);
+                } else {
+                    return nameB.localeCompare(nameA);
+                }
+            } else if (filterValue === 'date_asc' || filterValue === 'date_desc') {
+                // Untuk sorting berdasarkan tanggal, kita akan menggunakan urutan di DOM sebagai proxy
+                // karena data sudah diurutkan berdasarkan created_at di backend
+                const indexA = rows.indexOf(a);
+                const indexB = rows.indexOf(b);
+                
+                if (filterValue === 'date_asc') {
+                    return indexB - indexA; // Reverse order (oldest first)
+                } else {
+                    return indexA - indexB; // Keep current order (newest first)
+                }
+            }
+        });
+        
+        // Clear table body dan append sorted rows
+        tableBody.innerHTML = '';
+        rows.forEach(row => tableBody.appendChild(row));
+    });
 </script>
 
 </body>

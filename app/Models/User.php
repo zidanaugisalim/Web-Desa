@@ -35,6 +35,16 @@ class User extends Authenticatable
         return $this->hasMany(Anak::class, 'user_id');
     }
 
+    /**
+     * Get all of the stuntings for the User
+     *
+     * @return HasMany<Stunting>
+     */
+    public function stuntings(): HasMany
+    {
+        return $this->hasMany(Stunting::class, 'user_id');
+    }
+
     protected $attributes = [
         'role' => 'user', // nilai default
     ];
